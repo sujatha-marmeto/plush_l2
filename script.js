@@ -66,26 +66,26 @@ const jsonData = {
             ]
         }   
     ],
-    "favorites": [
-        {
-            "image": "https://s3-alpha-sig.figma.com/img/3002/b7e6/ffb3306f01b51617e281261e2d199216?Expires=1725235200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=nztJpiDQrDi~utkNHcKEJ7i3Mszr9AdsfLHCcqqXqzGftN1f1sAZ9aGWCc5YevdpyitfnEphpfnXzGmwodVzwKwKpHHD86AvD9bH6uSe1mltgLIR1jxU7RJqK21H9tiv8mx5qQk0J-aC91bvhxwWc5N-2el8IZdKYGPJYS8NkGyIcwg3-fJ0DcaVbj~9lhXmlxZ0DvHNt0~taqfXNGeFYsXlYGS3ZkbbDy6OJ7BcsSCq5CxnXEG5RgMhPxcH4tJHYo1vGmcalt7ajMoJ~G5ipr6-g0l8LFDQ-3OyZG4S6kMdZFzT1oRLFLH~-~1stB~dlgL897gApQWulp1jz41p1g__",
-            "altText": "Open laptop with black screen",
-            "photographer": "Jane Smith",
-            "tags": ["favorite"]
-        },
-        {
-            "image": "https://cdn.mos.cms.futurecdn.net/h7RghmVhRSKgsqSpRCgiL-1200-80.jpg",
-            "altText": "Man working on a laptop",
-            "photographer": "Tom Johnson",
-            "tags": ["favorite"]
-        },
-        {
-            "image": "https://imgeng.jagran.com/images/2024/05/31/article/image/Best%20Touchscreen%20Laptops%20in%20India-1717149073237.jpg",
-            "altText": "Laptop with a dark background",
-            "photographer": "Alex Brown",
-            "tags": ["favorite"]
-        }
-    ]
+    // "favorites": [
+    //     {
+    //         "image": "https://s3-alpha-sig.figma.com/img/3002/b7e6/ffb3306f01b51617e281261e2d199216?Expires=1725235200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=nztJpiDQrDi~utkNHcKEJ7i3Mszr9AdsfLHCcqqXqzGftN1f1sAZ9aGWCc5YevdpyitfnEphpfnXzGmwodVzwKwKpHHD86AvD9bH6uSe1mltgLIR1jxU7RJqK21H9tiv8mx5qQk0J-aC91bvhxwWc5N-2el8IZdKYGPJYS8NkGyIcwg3-fJ0DcaVbj~9lhXmlxZ0DvHNt0~taqfXNGeFYsXlYGS3ZkbbDy6OJ7BcsSCq5CxnXEG5RgMhPxcH4tJHYo1vGmcalt7ajMoJ~G5ipr6-g0l8LFDQ-3OyZG4S6kMdZFzT1oRLFLH~-~1stB~dlgL897gApQWulp1jz41p1g__",
+    //         "altText": "Open laptop with black screen",
+    //         "photographer": "Jane Smith",
+    //         "tags": ["favorite"]
+    //     },
+    //     {
+    //         "image": "https://cdn.mos.cms.futurecdn.net/h7RghmVhRSKgsqSpRCgiL-1200-80.jpg",
+    //         "altText": "Man working on a laptop",
+    //         "photographer": "Tom Johnson",
+    //         "tags": ["favorite"]
+    //     },
+    //     {
+    //         "image": "https://imgeng.jagran.com/images/2024/05/31/article/image/Best%20Touchscreen%20Laptops%20in%20India-1717149073237.jpg",
+    //         "altText": "Laptop with a dark background",
+    //         "photographer": "Alex Brown",
+    //         "tags": ["favorite"]
+    //     }
+    // ]
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -96,39 +96,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const prevBtn = document.getElementById("prev-btn");
     const nextBtn = document.getElementById("next-btn");
 
-    if (!favoritesContainer) {
-        console.error('Favorites container not found');
+    if (!favoritesContainer || !staticSimilarContainer) {
+        console.error('Favorites or Static Similar items container not found');
         return;
     }
 
-    if (!staticSimilarContainer) {
-        console.error('Static similar items container not found');
-        return;
-    }
+    let favoritesList = [];
+    let scrollIndex = 0;
 
-    let favoritesList = [...jsonData.favorites]; // Start with static favorites
-    let scrollIndex = 0; // Keep track of the scroll position
-
-    // Render the favorite items
-    function renderFavorites() {
-        favoritesContainer.innerHTML = "";
-        if (favoritesList.length === 0) {
-            favoritesContainer.innerHTML = "<p>No favorites yet.</p>";
-            return;
-        }
-
-        favoritesList.forEach(favorite => {
-            const favoriteItem = document.createElement("div");
-            favoriteItem.className = "favorite-item border w-30 bg-white border border-gray-300 p-4 w-full mb-4 shadow-lg transition-transform duration-300 hover:shadow-xl";
-            favoriteItem.innerHTML = `
-                <img src="${favorite.image}" alt="${favorite.altText}" class="w-full h-auto rounded-md">
-                <p class="mt-2 text-center text-gray-700">Photographer: ${favorite.photographer}</p>
-            `;
-            favoritesContainer.appendChild(favoriteItem);
+    function updateFavoritesList() {
+        favoritesList = [];
+        jsonData.items.forEach(item => {
+            item.favorites.forEach(user => {
+                if (!favoritesList.some(f => f.image === item.src)) {
+                    favoritesList.push({
+                        image: item.src,
+                        altText: item.title,
+                        photographer: "Unknown",
+                        tags: ["favorite"]
+                    });
+                }
+            });
         });
     }
 
-    // Add a favorite item
+    function renderFavorites() {
+        favoritesContainer.innerHTML = favoritesList.length === 0
+            ? "<p>No favorites yet.</p>"
+            : favoritesList.map(favorite => `
+                <div class="favorite-item border w-30 bg-white border border-gray-300 p-4 w-full mb-4 shadow-lg transition-transform duration-300 hover:shadow-xl">
+                    <img src="${favorite.image}" alt="${favorite.altText}" class="w-full h-auto rounded-md">
+                    <p class="mt-2 text-center text-gray-700">Photographer: ${favorite.photographer}</p>
+                </div>
+            `).join('');
+    }
+
     function addFavorite(favorite) {
         if (!favoritesList.some(f => f.image === favorite.image)) {
             favoritesList.push(favorite);
@@ -136,27 +138,60 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Render the static similar items
+    function removeFavorite(favorite) {
+        favoritesList = favoritesList.filter(f => f.image !== favorite.image);
+        renderFavorites();
+    }
+
     function renderStaticSimilarItems() {
-        staticSimilarContainer.innerHTML = "";
-        jsonData.items.forEach(item => {
-            item.similar.forEach(similar => {
-                const similarItem = document.createElement("div");
-                similarItem.className = "similar-item flex-none w-60 bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden mt-3";
-                similarItem.innerHTML = `
-                    <img src="${similar.src}" alt="${similar.title}" class="w-full h-32 object-cover">
+        staticSimilarContainer.innerHTML = jsonData.items.flatMap(item => item.similar.map(similar => {
+            const isFavorite = favoritesList.some(f => f.image === similar.src);
+            return `
+                <div class="similar-item flex-none w-60 bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden mt-3">
+                    <div class="relative flex">
+                        <img src="${similar.src}" alt="${similar.title}" class="w-full h-32 object-cover">
+                        <div class="wishlist-icon absolute ${isFavorite ? 'favorited' : ''}">
+                            <i class="fas fa-heart ml-52"></i>
+                        </div>
+                    </div>
                     <div class="p-4">
                         <p class="text-gray-700 text-center">${similar.title}</p>
                     </div>
-                `;
-                staticSimilarContainer.appendChild(similarItem);
-            });
-        });
+                </div>
+            `;
+        }).join(''));
 
+        attachWishlistIconEvents();
         updateNavButtons();
     }
 
-    // Update navigation buttons for similar items scrolling
+    function attachWishlistIconEvents() {
+        document.querySelectorAll(".wishlist-icon").forEach(icon => {
+            icon.addEventListener("click", () => {
+                const imgSrc = icon.closest(".similar-item").querySelector("img").src;
+                const isFavorited = icon.classList.contains("favorited");
+
+                if (isFavorited) {
+                    removeFavorite({
+                        image: imgSrc,
+                        altText: icon.closest(".similar-item").querySelector("img").alt,
+                        photographer: "Unknown",
+                        tags: ["favorite"]
+                    });
+                    icon.classList.remove("favorited");
+                } else {
+                    addFavorite({
+                        image: imgSrc,
+                        altText: icon.closest(".similar-item").querySelector("img").alt,
+                        photographer: "Unknown",
+                        tags: ["favorite"]
+                    });
+                    icon.classList.add("favorited");
+                }
+            });
+        });
+    }
+
     function updateNavButtons() {
         const containerWidth = staticSimilarContainer.scrollWidth;
         const viewWidth = staticSimilarContainer.clientWidth;
@@ -166,37 +201,28 @@ document.addEventListener("DOMContentLoaded", () => {
         nextBtn.disabled = scrollIndex >= maxScroll;
     }
 
-    // Scroll the similar items container
     function scrollContainer(direction) {
         const viewWidth = staticSimilarContainer.clientWidth;
+        const containerWidth = staticSimilarContainer.scrollWidth;
+        const maxScroll = containerWidth - viewWidth;
 
         if (direction === 'prev') {
-            scrollIndex -= viewWidth;
+            scrollIndex = Math.max(0, scrollIndex - viewWidth);
         } else if (direction === 'next') {
-            scrollIndex += viewWidth;
+            scrollIndex = Math.min(maxScroll, scrollIndex + viewWidth);
         }
 
-        scrollIndex = Math.max(0, Math.min(scrollIndex, staticSimilarContainer.scrollWidth - viewWidth));
         staticSimilarContainer.scrollTo({ left: scrollIndex, behavior: 'smooth' });
         updateNavButtons();
     }
 
-    // Handle search input
-    searchInput.addEventListener("input", (event) => {
-        const searchTerm = event.target.value.toLowerCase();
-        searchResultsContainer.innerHTML = "";
-
-        if (searchTerm === "") {
-            return;
-        }
-
-        jsonData.items.forEach(item => {
-            if (item.title.toLowerCase().includes(searchTerm) || 
-                item.tags.some(tag => tag.toLowerCase().includes(searchTerm))) {
-                
-                const resultItem = document.createElement("div");
-                resultItem.className = "search-result border border-gray-300 rounded-lg p-4 mb-4 shadow-md bg-white border border-gray-300 rounded-lg";
-                resultItem.innerHTML = `
+    function handleSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        searchResultsContainer.innerHTML = jsonData.items
+            .filter(item => item.title.toLowerCase().includes(searchTerm) ||
+                item.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+            .map(item => `
+                <div class="search-result border border-gray-300 rounded-lg p-4 mb-4 shadow-md bg-white border border-gray-300 rounded-lg">
                     <div class="flex flex-row gap-3">
                         <div class="w-40 h-40">
                             <img src="${item.src}" alt="${item.description}" class="w-50 h-70 rounded-md mb-2">
@@ -207,15 +233,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button class="favorite-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-600" data-id="${item.id}">Explore More</button>
                         </div>
                     </div>
-                `;
+                </div>
+            `).join('');
 
-                searchResultsContainer.appendChild(resultItem);
-            }
-        });
-
-        // Handle 'Explore More' button clicks
         document.querySelectorAll(".favorite-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
+            btn.addEventListener("click", e => {
                 const itemId = parseInt(e.target.getAttribute("data-id"));
                 const item = jsonData.items.find(i => i.id === itemId);
 
@@ -229,17 +251,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         });
-    });
+    }
 
-    // Initialize the page with rendered content
+    searchInput.addEventListener("input", handleSearch);
+
+    updateFavoritesList();
     renderFavorites();
     renderStaticSimilarItems();
 
-    // Handle scroll navigation buttons
     prevBtn.addEventListener("click", () => scrollContainer('prev'));
     nextBtn.addEventListener("click", () => scrollContainer('next'));
 });
-
-
-
-

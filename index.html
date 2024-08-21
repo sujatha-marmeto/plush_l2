@@ -20,6 +20,48 @@
             top: 50%;
             transform: translateY(-50%);
         }
+        #prev-btn, #next-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #8c9095;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 10; 
+        }
+
+        #prev-btn {
+            left: 10px; 
+        }
+
+        #next-btn {
+            right: 10px; 
+        }
+        
+    .wishlist-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: white; 
+            cursor: pointer;
+        }
+
+    .wishlist-icon i {
+        color: white;
+        border-radius: 50%;
+        padding: 4px;
+    }
+
+
+    .wishlist-icon.favorited i {
+        color: rgb(238, 39, 39);
+        border: none; 
+    }
+
+        
     </style>
 </head>
 <body class="bg-gray-100">
@@ -99,7 +141,6 @@
     </button>
     <!-- Similar Items Container -->
     <div id="static-similar-items" class="flex space-x-4 overflow-hidden">
-        <!-- Similar items will be rendered here -->
     </div>
 </div>
 
